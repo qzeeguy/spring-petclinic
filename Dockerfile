@@ -1,19 +1,24 @@
-# base image https://hub.docker.com/layers/library/openjdk/17-jdk-alpine/
-# FROM openjdk:17-jdk-alpine
-# https://hub.docker.com/_/amazoncorretto/
-# FROM amazoncorretto:25-jdk
-# https://hub.docker.com/_/eclipse-temurin
-FROM eclipse-temurin:25-jdk-alpine
+# ---------- build stage ----------
+FROM maven:3.9.4-eclipse-temurin-17 AS builder
+LABEL maintainer="qzee"
+WORKDIR /build
+COPY pom.xml .
+RUN mvn dependency:go-offline
+COPY src ./src
+RUN mvn package -DskipTests
 
-# Set environment variables ref: https://docs.docker.com/build/building/variables/#env-usage-example
-ARG JAR_FILE
-# ENV JAR_FILE=spring-petclinic-3.4.0-SNAPSHOT.jar
-
+# ---------- runtime stage ----------
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
+COPY --from=builder /build/target/*.jar app.jar
 
-COPY ${JAR_FILE} /app/spring-petclinic.jar
+# Environment variables (match Spring EXACTLY)
+ENV POSTGRES_URL=""
+ENV POSTGRES_USER=""
+ENV POSTGRES_PASS=""
+ENV SPRING_PROFILES_ACTIVE=""
 
-# Set the command to run the Spring Boot application
-# java -jar target/spring-petclinic-3.2.0-SNAPSHOT.jar --server.port=7080 
-# CMD java -jar ${JAR_FILE} 
-CMD ["java", "-jar", "spring-petclinic.jar"]
+EXPOSE 8080
+
+# Let Spring Boot do its job
+ENTRYPOINT ["java","-jar","/app/app.jar"]
