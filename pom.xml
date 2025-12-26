@@ -159,7 +159,14 @@
   </dependencies>
 
   <build>
-    <plugins>
+          <plugins>
+
+         <!-- Add the Sonar plugin here -->
+    <plugin>
+      <groupId>org.sonarsource.scanner.maven</groupId>
+      <artifactId>sonar-maven-plugin</artifactId>
+      <version>4.13.0.2311</version>
+    </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
@@ -374,7 +381,7 @@
                       </action>
                     </pluginExecution>
                     <pluginExecution>
-                      <pluginExecutionFilter>
+                    <pluginExecutionFilter>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <versionRange>[1,)</versionRange>
