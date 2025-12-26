@@ -27,17 +27,15 @@ pipeline {
         }
 
         stage('Static Code Analysis') {
-            steps {
-                withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_AUTH_TOKEN')]) {
-                    sh '''
-                        cd spring-petclinic
-                        mvn sonar:sonar \
-                        -Dsonar.login=$SONAR_AUTH_TOKEN \
-                        -Dsonar.host.url=http://127.0.0.1:9000
-                    '''
-                }
-            }
+      environment {
+        SONAR_URL = "http://127.0.0.1:9000"
+      }
+      steps {
+        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_AUTH_TOKEN')]) {
+          sh 'cd spring-petclinic && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
         }
+      }
+    }
 
         stage('Build and Push Docker Image') {
             steps {
