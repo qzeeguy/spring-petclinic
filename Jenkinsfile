@@ -31,7 +31,7 @@ pipeline {
         SONAR_URL = "http://127.0.0.1:9000"
     }
     steps {
-        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_AUTH_TOKEN')]) {
+        withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
             // Secure: shell interprets the token
             sh 'mvn clean verify -DskipTests sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
         }
