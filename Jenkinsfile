@@ -27,28 +27,29 @@ pipeline {
         }
 
         stage('Static Code Analysis') {
-            environment {
-                SONAR_URL = "https://54.161.90.80"
-            }
-            steps {
-                withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
-                    sh '''
-                        # Import self-signed cert into Java truststore if not already present
-                        if ! keytool -list -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -alias sonar >/dev/null 2>&1; then
-                            keytool -import -trustcacerts -alias sonar \
-                                -file /tmp/sonar.crt \
-                                -keystore $JAVA_HOME/lib/security/cacerts \
-                                -storepass changeit -noprompt
-                        fi
+    environment {
+        SONAR_URL = "https://54.161.90.80"
+    }
+    steps {
+        withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
+            sh '''
+                # Import self-signed cert into Java truststore if not already present
+                if ! keytool -list -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -alias sonar >/dev/null 2>&1; then
+                    keytool -import -trustcacerts -alias sonar \
+                        -file /tmp/sonar.crt \
+                        -keystore $JAVA_HOME/lib/security/cacerts \
+                        -storepass changeit -noprompt
+                fi
 
-                        # Run SonarQube scan
-                        mvn clean verify -DskipTests sonar:sonar \
-                            -Dsonar.login=$SONAR_AUTH_TOKEN \
-                            -Dsonar.host.url=$SONAR_URL
-                    '''
-                }
-            }
+                # Run SonarQube scan
+                mvn clean verify -DskipTests sonar:sonar \
+                    -Dsonar.login=$SONAR_AUTH_TOKEN \
+                    -Dsonar.host.url=$SONAR_URL
+            '''
         }
+    }
+}
+
 
         stage('Build and Push Docker Image') {
             steps {
