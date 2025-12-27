@@ -28,10 +28,10 @@ pipeline {
 
         stage('Static Code Analysis') {
             environment {
-                SONAR_URL = "http://192.168.21.201:9000"
+                SONAR_URL = "http://54.161.90.80:9000"
             }
             steps {
-                withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_AUTH_TOKEN')]) {
+                withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
                     // Secure: shell interprets the token
                     sh 'mvn clean verify -DskipTests sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
                 }
