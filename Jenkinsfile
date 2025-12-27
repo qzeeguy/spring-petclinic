@@ -32,13 +32,12 @@ pipeline {
     }
     steps {
         withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_AUTH_TOKEN')]) {
-            sh """
-             sh 'mvn clean verify sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
-
-            """
+            // Secure: shell interprets the token
+            sh 'mvn clean verify sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
         }
     }
 }
+
 
       stage('Build and Push Docker Image') {
             steps {
