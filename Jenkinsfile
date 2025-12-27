@@ -27,18 +27,17 @@ pipeline {
         }
 
         stage('Static Code Analysis') {
-            environment {
-                SONAR_URL = "http://54.161.90.80:9000"
-            }
-            steps {
-                withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
-                    // Secure: shell interprets the token
-                    sh 'mvn clean verify -DskipTests sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
-                }
-            }
+    environment {
+        SONAR_URL = "https://54.161.90.80" // <-- change to HTTPS
+    }
+    steps {
+        withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
+            // Use HTTPS and skip SSL verification if self-signed
+            sh 'mvn clean verify -DskipTests sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL -Dsonar.ssl.skipCertValidation=true'
         }
-
-        stage('Build and Push Docker Image') {
+    }
+}
+       stage('Build and Push Docker Image') {
             steps {
                 script {
                     sh '''
