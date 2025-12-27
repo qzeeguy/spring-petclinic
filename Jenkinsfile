@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.9-eclipse-temurin-17'
-            args '--user root -v /var/run/docker.sock:/var/run/docker.sock -v /home/ubuntu/sonar.crt:/tmp/sonar.crt'
+            args '--user root -v /var/run/docker.sock:/var/run/docker.sock -v /etc/nginx/ssl/sonar.crt:/tmp/sonar.crt'
         }
     }
 
@@ -28,16 +28,18 @@ pipeline {
 
         stage('Static Code Analysis') {
             environment {
-                SONAR_URL = "https://54.161.90.80"  // Use HTTPS here
+                SONAR_URL = "https://54.161.90.80"
             }
             steps {
                 withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
                     sh '''
-                        # Import self-signed cert into Java truststore
-                        keytool -import -trustcacerts -alias sonar \
-                            -file /tmp/sonar.crt \
-                            -keystore $JAVA_HOME/lib/security/cacerts \
-                            -storepass changeit -noprompt
+                        # Import self-signed cert into Java truststore if not already present
+                        if ! keytool -list -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -alias sonar >/dev/null 2>&1; then
+                            keytool -import -trustcacerts -alias sonar \
+                                -file /tmp/sonar.crt \
+                                -keystore $JAVA_HOME/lib/security/cacerts \
+                                -storepass changeit -noprompt
+                        fi
 
                         # Run SonarQube scan
                         mvn clean verify -DskipTests sonar:sonar \
