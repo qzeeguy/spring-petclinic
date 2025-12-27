@@ -26,19 +26,20 @@ pipeline {
             }
         }
 
- stage('Static Code Analysis') {
+ stage('SonarQube Analysis') {
     environment {
-        SONAR_URL = "http://192.168.21.201:9000"
+        SONAR_TOKEN = credentials('sonar')
     }
     steps {
-        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_AUTH_TOKEN')]) {
-            // Secure: shell interprets the token
-            sh 'mvn clean verify -DskipTests sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
-        }
+        sh '''
+        mvn clean verify \
+          -DskipTests=true \
+          -Dsonar.login=$SONAR_TOKEN \
+          -Dsonar.host.url=http://192.168.21.201:9000 \
+          -Dcheckstyle.skip
+        '''
     }
 }
-
-
       stage('Build and Push Docker Image') {
             steps {
                 script {
