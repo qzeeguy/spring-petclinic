@@ -26,18 +26,19 @@ pipeline {
             }
         }
 
- stage('Static Code Analysis') {
-    environment {
-        SONAR_URL = "http://192.168.21.201:9000"
-    }
-    steps {
-        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_AUTH_TOKEN')]) {
-            // Secure: shell interprets the token
-            sh 'mvn clean verify -DskipTests sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
+        stage('Static Code Analysis') {
+            environment {
+                SONAR_URL = "http://192.168.21.201:9000"
+            }
+            steps {
+                withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_AUTH_TOKEN')]) {
+                    // Secure: shell interprets the token
+                    sh 'mvn clean verify -DskipTests sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
+                }
+            }
         }
-    }
-}
-      stage('Build and Push Docker Image') {
+
+        stage('Build and Push Docker Image') {
             steps {
                 script {
                     sh '''
@@ -68,5 +69,6 @@ pipeline {
                 }
             }
         }
+
     }
 }
