@@ -24,7 +24,8 @@ pipeline {
             steps {
                 sh 'ls -ltr'
                 sh 'mvn clean package -Dcheckstyle.skip=true'
-                sh 'mvn clean verify -Dtest='!*PostgresIntegrationTests''
+                sh "mvn clean verify -Dtest='!*PostgresIntegrationTests'"
+
 
 
             }
