@@ -90,25 +90,25 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'github-manifest-token', variable: 'GITHUB_TOKEN')]) {
                     sh '''
-                        git config user.email "phemyolowo@gmail.com"
-                        git config user.name "phemy0"
+       git config user.email "phemyolowo@gmail.com"
+       git config user.name "phemy0"
 
-                        # Remove old clone if exists
-                         rm -rf spring-app-cicd-manifest
-                         
-                         # Clone the repo using token
-                          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/phemy0/spring-app-cicd-manifest.git
-                          cd spring-app-cicd-manifest
+       # Remove old clone if exists
+       rm -rf spring-app-cicd-manifest
 
+       # Clone the repo using token
+       git clone https://x-access-token:${GITHUB_TOKEN}@github.com/phemy0/spring-app-cicd-manifest.git
+       cd spring-app-cicd-manifest
 
-                         sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" deployment.yml
+       sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" deployment.yml
 
-                        git add deployment.yml
-                        git commit -m "Update image tag to ${BUILD_NUMBER}" || echo "No changes to commit"
-                        git push origin main
-                    '''
-                }
-            }
+       git add deployment.yml
+       git commit -m "Update image tag to ${BUILD_NUMBER}" || echo "No changes to commit"
+       git push origin main
+                   '''
         }
+    }
+}
+
     }
 }
