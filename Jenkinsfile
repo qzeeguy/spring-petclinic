@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'abhishekf5/maven-abhishek-docker-agent:v1'
+            image 'maven:3.9.9-eclipse-temurin-17'
             args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
@@ -28,14 +28,16 @@ pipeline {
         }
 
         stage('Static Code Analysis') {
-            steps {
-                withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
-                    sh '''
-                        mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}
-                    '''
-                }
-            }
+           environment {
+               SONAR_URL = "http://54.161.90.80:9000"
+           }
+           steps {
+               withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
+                   sh 'mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
         }
+    }
+}
+
 
         stage('Build Docker Image') {
             steps {
