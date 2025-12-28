@@ -4,7 +4,7 @@ pipeline {
             image 'maven:3.9.9-eclipse-temurin-17'
             args '--user root \
                   -v /var/run/docker.sock:/var/run/docker.sock \
-                  -v /opt/jenkins/ssl:/etc/nginx/ssl'
+                  -v /opt/jenkins/ssl:/ssl'
         }
     }
 
@@ -36,7 +36,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
                     sh '''
                         # Define the correct certificate file path
-                        CERT_FILE="/etc/nginx/ssl/sonar.crt"
+                        CERT_FILE="/ssl/sonar.crt"
 
                         # Import the certificate only if it exists
                         if [ -f "$CERT_FILE" ]; then
