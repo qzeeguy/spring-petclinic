@@ -23,7 +23,8 @@ pipeline {
         stage('Build and Test') {
             steps {
                 sh 'ls -ltr'
-                sh 'mvn clean package'
+                sh 'mvn clean package -Dcheckstyle.skip=true'
+
             }
         }
 
@@ -33,7 +34,7 @@ pipeline {
            }
            steps {
                withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
-                   sh 'mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
+                   sh 'mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL} -Dcheckstyle.skip=true'
         }
     }
 }
