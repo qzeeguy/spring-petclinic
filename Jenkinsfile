@@ -20,52 +20,47 @@ pipeline {
             }
         }
 
-
-
         stage('Prepare Maven Cache') {
-           steps {
-               sh '''
-                echo "Cleaning corrupted Maven cache..."
-               rm -rf ~/.m2/repository/org/testcontainers
-               rm -rf ~/.m2/repository/tools/jackson
-               rm -rf ~/.m2/repository/.cache
+            steps {
+                sh '''
+                    echo "Cleaning corrupted Maven cache..."
+                    rm -rf ~/.m2/repository/org/testcontainers
+                    rm -rf ~/.m2/repository/tools/jackson
+                    rm -rf ~/.m2/repository/.cache
                 '''
-    }
-}
-
+            }
+        }
 
         stage('Build and Test') {
-           steps {
-               sh '''
-               mvn clean verify \
-                 -Dcheckstyle.skip=true \
-                 -Dspring.profiles.active=test \
-                 -Dspring.docker.compose.enabled=false \
-                 -DskipTests=false \
-                 -Dtest='!*MySqlIntegrationTests,!*PostgresIntegrationTests'
-                 '''
-    }
-}
-
-
-    stage('Static Code Analysis') {
-    environment {
-        SONAR_URL = "http://54.161.90.80:9000"
-    }
-    steps {
-        withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
-            sh '''
-                mvn sonar:sonar \
-                    -Dsonar.token=$SONAR_AUTH_TOKEN \
-                    -Dsonar.host.url=${SONAR_URL} \
-                    -Dcheckstyle.skip=true \
-                    -Dsonar.sources=src/main/java \
-                    -Dsonar.exclusions=**/*.kt \
-                    -Dsonar.plugins.downloadOnlyRequired=true"
-            '''
+            steps {
+                sh '''
+                    mvn clean verify \
+                        -Dcheckstyle.skip=true \
+                        -Dspring.profiles.active=test \
+                        -Dspring.docker.compose.enabled=false \
+                        -DskipTests=false \
+                        -Dtest='!*MySqlIntegrationTests,!*PostgresIntegrationTests'
+                '''
+            }
         }
-    }
-}
+
+        stage('Static Code Analysis') {
+            environment {
+                SONAR_URL = "http://54.161.90.80:9000"
+            }
+            steps {
+                withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
+                    sh '''
+                        mvn sonar:sonar \
+                            -Dsonar.token=$SONAR_AUTH_TOKEN \
+                            -Dsonar.host.url=${SONAR_URL} \
+                            -Dcheckstyle.skip=true \
+                            -Dsonar.sources=src/main/java \
+                            -Dsonar.plugins.downloadOnlyRequired=true
+                    '''
+                }
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
