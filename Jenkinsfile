@@ -45,28 +45,34 @@ pipeline {
         }
 
         stage('Static Code Analysis') {
-            environment {
-                SONAR_URL = "http://54.161.90.80:9000"
-            }
             steps {
                 withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
-                    sh '''
+                    sh """
                         mvn sonar:sonar \
                             -Dsonar.token=$SONAR_AUTH_TOKEN \
                             -Dsonar.host.url=${SONAR_URL} \
                             -Dcheckstyle.skip=true \
                             -Dsonar.sources=src/main/java \
                             -Dsonar.plugins.downloadOnlyRequired=true
-                    '''
+                    """
                 }
             }
         }
 
+        /* ======== ONLY CHANGE STARTS HERE ======== */
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                sh '''
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      -v "$PWD":"$PWD" \
+                      -w "$PWD" \
+                      docker:27-cli \
+                      docker build -t ${DOCKER_IMAGE} .
+                '''
             }
         }
+        /* ======== ONLY CHANGE ENDS HERE ======== */
 
         stage('Push Docker Image') {
             steps {
@@ -95,6 +101,5 @@ pipeline {
                 }
             }
         }
-
-    } // end stages
-} // end pipeline
+    }
+}
