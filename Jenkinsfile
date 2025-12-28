@@ -48,17 +48,23 @@ pipeline {
 }
 
 
-        stage('Static Code Analysis') {
-           environment {
-               SONAR_URL = "http://54.161.90.80:9000"
-           }
-           steps {
-               withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
-                   sh 'mvn sonar:sonar -Dsonar.token=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL} -Dcheckstyle.skip=true'
+    stage('Static Code Analysis') {
+    environment {
+        SONAR_URL = "http://54.161.90.80:9000"
+    }
+    steps {
+        withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
+            sh '''
+                mvn sonar:sonar \
+                    -Dsonar.token=$SONAR_AUTH_TOKEN \
+                    -Dsonar.host.url=${SONAR_URL} \
+                    -Dcheckstyle.skip=true \
+                    -Dsonar.sources=src/main/java \
+                    -Dsonar.exclusions=**/*.kt
+            '''
         }
     }
 }
-
 
         stage('Build Docker Image') {
             steps {
