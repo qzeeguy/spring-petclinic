@@ -36,7 +36,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
                     sh '''
                         # Define the correct certificate file path
-                        CERT_FILE="/etc/nginx/ssl/sonar/sonar.crt"
+                        CERT_FILE="/etc/nginx/ssl/sonar.crt"
 
                         # Import the certificate only if it exists
                         if [ -f "$CERT_FILE" ]; then
