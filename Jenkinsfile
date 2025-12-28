@@ -90,8 +90,8 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'github-manifest-token', variable: 'GITHUB_TOKEN')]) {
                     sh '''
-       git config user.email "phemyolowo@gmail.com"
-       git config user.name "phemy0"
+       git config --global user.email "phemyolowo@gmail.com"
+       git config --global user.name "phemy0"
 
        # Remove old clone if exists
        rm -rf spring-app-cicd-manifest
