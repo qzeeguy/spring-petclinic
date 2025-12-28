@@ -54,8 +54,9 @@ pipeline {
                         mvn sonar:sonar \
                             -Dcheckstyle.skip=true \
                             -Dsonar.login=$SONAR_AUTH_TOKEN \
-                            -Dsonar.host.url=$SONAR_URL
+                            -Dsonar.host.url=$SONAR_URL \
                             -Dsonar.ws.ssl.verify=false
+
                     '''
                 }
             }
