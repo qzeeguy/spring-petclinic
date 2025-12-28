@@ -21,16 +21,18 @@ pipeline {
         }
 
         stage('Build and Test') {
-            steps {
-                sh 'ls -ltr'
-                sh 'mvn clean package -Dcheckstyle.skip=true'
-                 sh "mvn clean verify -Dtest='!*MySqlIntegrationTests,*!PostgresIntegrationTests'"
+           steps {
+               sh '''
+               mvn clean verify \
+                 -Dcheckstyle.skip=true \
+                 -Dspring.profiles.active=test \
+                 -Dspring.docker.compose.skip=true \
+                 -DskipTests=false \
+                 -Dtest='!*MySqlIntegrationTests,!*PostgresIntegrationTests'
+                 '''
+    }
+}
 
-
-
-
-            }
-        }
 
         stage('Static Code Analysis') {
            environment {
