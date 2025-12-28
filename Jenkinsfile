@@ -20,6 +20,20 @@ pipeline {
             }
         }
 
+
+
+        stage('Prepare Maven Cache') {
+           steps {
+               sh '''
+                echo "Cleaning corrupted Maven cache..."
+               rm -rf ~/.m2/repository/org/testcontainers
+               rm -rf ~/.m2/repository/tools/jackson
+               rm -rf ~/.m2/repository/.cache
+                '''
+    }
+}
+
+
         stage('Build and Test') {
            steps {
                sh '''
