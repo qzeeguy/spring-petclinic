@@ -79,7 +79,7 @@ pipeline {
             steps {
                 script {
                     def image = docker.image("${DOCKER_IMAGE}")
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub') {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
                         image.push()
                     }
                 }
@@ -88,7 +88,7 @@ pipeline {
 
         stage('Update Deployment Manifest') {
             steps {
-                withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                withCredentials([string(credentialsId: 'github-manifest-token', variable: 'GITHUB_TOKEN')]) {
                     sh '''
                         git config user.email "phemyolowo@gmail.com"
                         git config user.name "phemy0"
