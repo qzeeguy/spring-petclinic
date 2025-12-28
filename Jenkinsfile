@@ -35,17 +35,26 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
                     sh '''
-                        if ! keytool -list -cacerts -storepass changeit -alias sonar >/dev/null 2>&1; then
-                            echo "Importing SonarQube certificate..."
-                            keytool -import -trustcacerts -alias sonar \
-                                -file /etc/nginx/ssl/sonar.crt \
-                                -cacerts -storepass changeit -noprompt
+                        # Define the correct certificate file path
+                        CERT_FILE="/etc/nginx/ssl/sonar/sonar.crt"
+
+                        # Import the certificate only if it exists
+                        if [ -f "$CERT_FILE" ]; then
+                            if ! keytool -list -cacerts -storepass changeit -alias sonar >/dev/null 2>&1; then
+                                echo "Importing SonarQube certificate..."
+                                keytool -import -trustcacerts -alias sonar \
+                                    -file "$CERT_FILE" \
+                                    -cacerts -storepass changeit -noprompt
+                            fi
+                        else
+                            echo "WARNING: Certificate file not found at $CERT_FILE, skipping import..."
                         fi
 
+                        # Run SonarQube analysis
                         mvn sonar:sonar \
-                        -Dcheckstyle.skip=true \
-                        -Dsonar.login=$SONAR_AUTH_TOKEN \
-                        -Dsonar.host.url=$SONAR_URL
+                            -Dcheckstyle.skip=true \
+                            -Dsonar.login=$SONAR_AUTH_TOKEN \
+                            -Dsonar.host.url=$SONAR_URL
                     '''
                 }
             }
@@ -54,9 +63,10 @@ pipeline {
         stage('Build & Push Docker Image') {
             steps {
                 script {
-                    sh '''
-                        docker build -t alqoseemi/ultimate-cicd:${BUILD_NUMBER} .
-                    '''
+                    // Build Docker image
+                    sh "docker build -t alqoseemi/ultimate-cicd:${BUILD_NUMBER} ."
+
+                    // Push image to Docker Hub
                     def image = docker.image("alqoseemi/ultimate-cicd:${BUILD_NUMBER}")
                     docker.withRegistry('https://index.docker.io/v1/', 'dockerhub') {
                         image.push()
@@ -72,10 +82,11 @@ pipeline {
                         git config user.email "phemyolowo@gmail.com"
                         git config user.name "phemy0"
 
+                        # Replace placeholder with current build number
                         sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" spring-app-cicd-manifest/deployment.yml
 
                         git add spring-app-cicd-manifest/deployment.yml
-                        git commit -m "Update image tag to ${BUILD_NUMBER}"
+                        git commit -m "Update image tag to ${BUILD_NUMBER}" || echo "No changes to commit"
                         git push https://${GITHUB_TOKEN}@github.com/phemy0/spring-app-cicd-manifest HEAD:main
                     '''
                 }
