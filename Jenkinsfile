@@ -1,68 +1,42 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.9-eclipse-temurin-17'
-            args '--user root \
-                  -v /var/run/docker.sock:/var/run/docker.sock \
-                  -v /opt/jenkins/ssl:/ssl'
-        }
+  agent {
+    docker {
+      image 'abhishekf5/maven-abhishek-docker-agent:v1'
+      args '--user root -v /var/run/docker.sock:/var/run/docker.sock' // mount Docker socket to access the host's Docker daemon
     }
-
-    environment {
-        SONAR_URL = "https://54.161.90.80"
+  }
+  stages {
+    stage('Checkout') {
+      steps {
+        sh 'echo passed'
+        //git branch: 'main', url: 'https://github.com/qzeeguy/spring-petclinic.gi'
+      }
     }
-
-    stages {
-
-        stage('Checkout Source') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/qzeeguy/spring-petclinic.git'
-            }
+    stage('Build and Test') {
+      steps {
+        sh 'ls -ltr'
+        // build the project and create a JAR file
+        sh 'cd spring-petclinic && mvn clean package'
+      }
+    }
+    stage('Static Code Analysis') {
+      environment {
+        SONAR_URL = "http://54.161.90.80:9000"
+      }
+      steps {
+        withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
+          sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
         }
-
-        stage('Build (Skip Checkstyle)') {
-            steps {
-                sh '''
-                    mvn clean package \
-                    -DskipTests=true \
-                    -Dcheckstyle.skip=true
-                '''
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                withCredentials([string(credentialsId: 'qube', variable: 'SONAR_AUTH_TOKEN')]) {
-                    sh '''
-                        # Define the correct certificate file path
-                        CERT_FILE="/ssl/sonar.crt"
-
-                        # Import the certificate only if it exists
-                        if [ -f "$CERT_FILE" ]; then
-                            if ! keytool -list -cacerts -storepass changeit -alias sonar >/dev/null 2>&1; then
-                                echo "Importing SonarQube certificate..."
-                                keytool -import -trustcacerts -alias sonar \
-                                    -file "$CERT_FILE" \
-                                    -cacerts -storepass changeit -noprompt
-                            fi
-                        else
-                            echo "WARNING: Certificate file not found at $CERT_FILE, skipping import..."
-                        fi
-
-                        # Run SonarQube analysis
-                        mvn sonar:sonar \
-                            -Dcheckstyle.skip=true \
-                            -Dsonar.login=$SONAR_AUTH_TOKEN \
-                            -Dsonar.host.url=$SONAR_URL \
-                            -Dsonar.ws.ssl.verify=false
-
-                    '''
-                }
-            }
-        }
-
-        stage('Build & Push Docker Image') {
+      }
+    }
+    stage('Build and Push Docker Image') {
+      environment {
+        DOCKER_IMAGE = "alqoseemi/ultimate-cicd:${BUILD_NUMBER}"
+        // DOCKERFILE_LOCATION = "spring-petclinic/Dockerfile"
+        REGISTRY_CREDENTIALS = credentials('dockerhub')
+      }
+      
+     stage('Build & Push Docker Image') {
             steps {
                 script {
                     // Build Docker image
