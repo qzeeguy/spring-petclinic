@@ -26,7 +26,7 @@ pipeline {
                mvn clean verify \
                  -Dcheckstyle.skip=true \
                  -Dspring.profiles.active=test \
-                 -Dspring.docker.compose.skip=true \
+                 -Dspring.docker.compose.enabled=false \
                  -DskipTests=false \
                  -Dtest='!*MySqlIntegrationTests,!*PostgresIntegrationTests'
                  '''
