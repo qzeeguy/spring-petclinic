@@ -3,12 +3,12 @@
 pipeline {
   agent {
     docker {
-      image 'maven:3.9.9-eclipse-temurin-17'
-      args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
-        args '-v /etc/nginx/ssl:/etc/nginx/ssl'
-          // mount Docker socket to access the host's Docker daemon
+        image 'maven:3.9.9-eclipse-temurin-17'
+        args '--user root \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v /etc/nginx/ssl:/etc/nginx/ssl'
     }
-  }
+}
 
 
     stages {
