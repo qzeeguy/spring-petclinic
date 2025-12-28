@@ -60,18 +60,19 @@ pipeline {
         }
 
         /* ======== ONLY CHANGE STARTS HERE ======== */
-        stage('Build Docker Image') {
-            steps {
-                sh '''
-                    docker run --rm \
-                      -v /var/run/docker.sock:/var/run/docker.sock \
-                      -v "$PWD":"$PWD" \
-                      -w "$PWD" \
-                      docker:27-cli \
-                      docker build -t ${DOCKER_IMAGE} .
-                '''
-            }
-        }
+
+         stage('Build Docker Image') {
+             steps {  
+                   sh '''
+                       echo "Installing Docker CLI..."
+                       apt-get update -qq
+                       apt-get install -y -qq docker.io
+
+                       docker build -t ${DOCKER_IMAGE} .
+                      '''
+          }
+     }
+
         /* ======== ONLY CHANGE ENDS HERE ======== */
 
         stage('Push Docker Image') {
