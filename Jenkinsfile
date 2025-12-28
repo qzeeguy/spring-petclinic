@@ -23,8 +23,8 @@ pipeline {
         stage('Build and Test') {
             steps {
                 sh 'ls -ltr'
-                sh "${mvn}/bin/mvn clean package -Dcheckstyle.skip=true"
-                sh "${mvn}/bin/mvn clean verify -Dtest='!*PostgresIntegrationTests'"
+                sh 'mvn clean package -Dcheckstyle.skip=true'
+                sh 'mvn clean verify -Dtest='!*PostgresIntegrationTests'
 
 
             }
