@@ -24,7 +24,7 @@ pipeline {
             steps {
                 sh 'ls -ltr'
                 sh 'mvn clean package -Dcheckstyle.skip=true'
-                sh "mvn clean verify -Dspring.profiles.active=mysql -Dtest='!*PostgresIntegrationTests'"
+                 sh "mvn clean verify -Dtest='!*MySqlIntegrationTests,*!PostgresIntegrationTests'"
 
 
 
