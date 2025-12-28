@@ -60,7 +60,8 @@ pipeline {
                     -Dsonar.host.url=${SONAR_URL} \
                     -Dcheckstyle.skip=true \
                     -Dsonar.sources=src/main/java \
-                    -Dsonar.exclusions=**/*.kt
+                    -Dsonar.exclusions=**/*.kt \
+                    -Dsonar.plugins.downloadOnlyRequired=true"
             '''
         }
     }
