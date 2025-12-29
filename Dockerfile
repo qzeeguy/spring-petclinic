@@ -1,6 +1,6 @@
 # ---------- build stage ----------
 FROM maven:3.9.4-eclipse-temurin-17 AS builder
-LABEL maintainer="qzee"
+LABEL maintainer="qzeeguy"
 WORKDIR /build
 COPY pom.xml .
 RUN mvn dependency:go-offline
